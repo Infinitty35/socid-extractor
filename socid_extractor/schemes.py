@@ -155,6 +155,26 @@ def _bio_site_social_value(profile, provider):
     return None
 
 
+def _faceit_current_game(profile):
+    games = profile.get('games') or {}
+    game_key = profile.get('flag')
+    if game_key and isinstance(games.get(game_key), dict):
+        return games[game_key]
+    for game in games.values():
+        if isinstance(game, dict):
+            return game
+    return {}
+
+
+def _faceit_streaming_links(profile):
+    streaming = profile.get('streaming') or {}
+    links = {}
+    for platform, handle in streaming.items():
+        if handle:
+            links[platform.removesuffix('_id')] = handle
+    return links
+
+
 schemes = {
     # IMPORTANT: extract() returns the FIRST matching scheme.
     # More specific schemes (more/stricter flags) must come BEFORE
@@ -3266,6 +3286,39 @@ schemes = {
             'updated_at': lambda x: parse_datetime(x.get('metadata', {}).get('last_updated_at')),
             'links': _bio_site_links,
             'instagram_username': lambda x: _bio_site_social_value(x, 'instagram'),
+        },
+    },
+    'Faceit API': {
+        'url_hints': ('faceit.com',),
+        'flags': ['"payload"', '"skill_level_label"' ,'"registration_status_v2"'],
+        'regex': r'^({[\S\s]+})$',
+        'extract_json': True,
+        'transforms': [
+            json.loads,
+            lambda x: x.get('payload') or {},
+            json.dumps,
+        ],
+        'url_mutations': [
+            {
+                'from': r'https?://(?:www\.)?faceit\.com/(?:[a-z]{2}/)?players/(?P<username>[^/?#]+).*',
+                'to': 'https://www.faceit.com/api/users/v1/nicknames/{username}',
+            },
+        ],
+        'fields': {
+            'uid': lambda x: x.get('id'),
+            'username': lambda x: x.get('nickname'),
+            'image': lambda x: x.get('avatar'),
+            'image_bg': lambda x: x.get('cover_image_url'),
+            'country_code': lambda x: x.get('country', '').upper() if x.get('country') else None,
+            'created_at': lambda x: parse_datetime_str(x.get('created_at')) if x.get('created_at') else None,
+            'friends_count': lambda x: len(x.get('friends') or []),
+            'faceit_game': lambda x: x.get('flag'),
+            'faceit_elo': lambda x: _faceit_current_game(x).get('faceit_elo'),
+            'faceit_skill_level': lambda x: _faceit_current_game(x).get('skill_level'),
+            'faceit_region': lambda x: _faceit_current_game(x).get('region'),
+            'steam_id': lambda x: x.get('platforms', {}).get('steam', {}).get('id64'),
+            'steam_nickname': lambda x: x.get('platforms', {}).get('steam', {}).get('nickname'),
+            'social_links': lambda x: _faceit_streaming_links(x),
         },
     },
 }

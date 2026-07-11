@@ -1636,3 +1636,23 @@ def test_bio_site():
     assert 'https://www.instagram.com/fish_bae148' in info.get('links')
     assert 'https://shopee.tw/kissyoumybaby' in info.get('links')
     assert 'social_links' not in info
+
+
+def test_faceit_api():
+    """Faceit API"""
+    info = extract(parse('https://www.faceit.com/api/users/v1/nicknames/simple')[0])
+
+    assert info.get('uid') == 'c55fb0f8-e3d9-4fc0-b3fa-f2878513e588'
+    assert info.get('username') == 'simple'
+    assert info.get('country_code') == 'BJ'
+    assert info.get('created_at') == '2018-08-02 10:46:27.703000+00:00'
+    assert info.get('friends_count', '').isdigit()
+    assert info.get('faceit_game') == 'cs2'
+    assert info.get('faceit_region') == 'EU'
+    assert info.get('faceit_elo', '').isdigit()
+    assert info.get('faceit_skill_level', '').isdigit()
+    assert info.get('steam_id') == '76561198838222710'
+    assert info.get('steam_nickname') == 'kr1pton'
+    assert info.get('social_links') == "{'twitch': 'umarooff'}"
+    assert 'faceit-cdn.net' in info.get('image', '')
+    assert 'faceit-cdn.net' in info.get('image_bg', '')

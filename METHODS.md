@@ -165,5 +165,6 @@
 160 | Discourse API |  |  |
 161 | Snapchat | [snapchat](https://github.com/soxoj/socid-extractor/search?q=test_snapchat) |  |
 162 | Bio Site | [bio_site](https://github.com/soxoj/socid-extractor/search?q=test_bio_site) |  |
+163 | Faceit API | [faceit_api](https://github.com/soxoj/socid-extractor/search?q=test_faceit_api) |  |
 
-The table has been updated at 2026-07-08 12:57:59.495553 UTC
+The table has been updated at 2026-07-10 10:00:54.075089 UTC
